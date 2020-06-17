@@ -1,0 +1,17 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+atomic-sequence = "*"
+
+[dev-packages]
+black = "==19.10b0"
+tox = "*"
+pytest = "*"
+pytest-benchmark = "*"
+assertpy = "*"
+
+[requires]
+python_version = "3.8"

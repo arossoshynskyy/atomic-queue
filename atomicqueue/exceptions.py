@@ -1,0 +1,2 @@
+class InvalidWaitStrategyException(Exception):
+    pass
