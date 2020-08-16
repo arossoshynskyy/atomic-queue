@@ -25,13 +25,13 @@ class RingBuffer:
         """ Get a new barrier to be tracked by event processors """
         return self.sequencer.get_new_barrier(sequences)
 
-    def publish_event(self, translator, **kwargs):
+    def publish_event(self, translator, data):
         """ Claim the next slot in the buffer and spin until it can be written to"""
         sequence = self.sequencer.next()
 
         event = self.buffer[sequence % self.capacity]
 
-        translator.translate(event, **kwargs)
+        translator.translate(event, data)
 
         self.sequencer.publish(sequence)
 

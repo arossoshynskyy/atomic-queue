@@ -63,8 +63,8 @@ class AtomicQueue:
         for group in self.event_handler_groups:
             group.start()
 
-    def publish_event(self, translator, **kwargs):
-        self.ring_buffer.publish_event(translator, **kwargs)
+    def publish_event(self, translator, data):
+        self.ring_buffer.publish_event(translator, data)
 
     def stop(self):
         for group in self.event_handler_groups:

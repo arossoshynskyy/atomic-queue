@@ -11,11 +11,11 @@ from atomicqueue import (
 
 
 class TestTranslator(Translator):
-    def translate(self, event, **kwargs):
-        event.id = kwargs["id"]
-        event.price = kwargs["price"]
-        event.size = kwargs["size"]
-        event.side = kwargs["side"]
+    def translate(self, event, data):
+        event.id = data["id"]
+        event.price = data["price"]
+        event.size = data["size"]
+        event.side = data["side"]
 
 
 class Publisher(threading.Thread):
@@ -30,14 +30,14 @@ class Publisher(threading.Thread):
         for idx in range(self.num_events):
             data = {
                 "id": f"{self.name}_{idx}",
-                "price": 100 + idx,
-                "size": 10 * idx,
+                "price": 10,
+                "size": 10,
                 "side": "buy",
             }
 
             print(f"Publishing data {data}")
 
-            self.queue.publish_event(self.translator, **data)
+            self.queue.publish_event(self.translator, data)
 
 
 class Event:
@@ -103,8 +103,8 @@ class TestAtomicQueue(unittest.TestCase):
         publisher1.start()
         publisher2.start()
 
-        time.sleep(2)
-        queue.stop()
+        #time.sleep(2)
+        #queue.stop()
 
 
 if __name__ == "__main__":

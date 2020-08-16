@@ -39,16 +39,16 @@ Once configured the queue can be started with the following command.
 queue.start()
 ```
 
-To publish to the queue, publishers must implement the Translator interface and pass an instance of the translator to the publish_event method of the queue.
+To publish to the queue, publishers must implement the Translator interface and pass an instance of the translator to the publish_event method of the queue along with the data to be published.
 
 
 ```
 class ExampleTranslator(Translator):
-    def translate(self, event, **kwargs):
-        event.id = kwargs["id"]
-        event.price = kwargs["price"]
-        event.size = kwargs["size"]
-        event.side = kwargs["side"]
+    def translate(self, event, data):
+        event.id = data["id"]
+        event.price = data["price"]
+        event.size = data["size"]
+        event.side = data["side"]
 
 class ExamplePublisher(threading.Thread):
     def __init__(self, queue, num_events):
@@ -62,8 +62,8 @@ class ExamplePublisher(threading.Thread):
             self.queue.publish_event(
                 self.translator,
                 id=f"{self.name}_{idx}",
-                price=100 + idx,
-                size=10 * idx,
+                price=10,
+                size=10,
                 side="buy",
             )
 
