@@ -1,8 +1,9 @@
+from atomicqueue.exceptions import NoEventProcessorsException, InvalidCapacityException
 from atomicqueue.sequencer import Sequencer
 from atomicqueue.barrier import SequenceBarrier
 from atomicqueue.ring_buffer import RingBuffer
 from atomicqueue.event_processor import EventProcessor
-from atomicqueue.wait_strategy import get_strategy
+from atomicqueue.wait_strategy import get_strategy, BUSY_SPIN_WAIT_STRATEGY
 
 
 class AtomicQueue:
@@ -13,14 +14,13 @@ class AtomicQueue:
     capacity: int - must be base 2 
     """
 
-    def __init__(self, event_type, wait_strategy, capacity):
+    def __init__(self, capacity, wait_strategy=BUSY_SPIN_WAIT_STRATEGY):
+        if capacity % 2 != 0:
+            raise InvalidCapacityException
+
         self.wait_strategy = get_strategy(wait_strategy)
-
         sequencer = Sequencer(self.wait_strategy, capacity)
-        self.ring_buffer = RingBuffer(
-            event_type, sequencer, self.wait_strategy, capacity
-        )
-
+        self.ring_buffer = RingBuffer(sequencer, self.wait_strategy, capacity)
         self.processors = []
         self.event_handler_groups = []
 
@@ -59,12 +59,14 @@ class AtomicQueue:
         return self
 
     def start(self):
-        # TODO check gating barrier exists
+        if len(self.event_handler_groups) == 0:
+            raise NoEventProcessorsException
+
         for group in self.event_handler_groups:
             group.start()
 
-    def publish_event(self, translator, data):
-        self.ring_buffer.publish_event(translator, data)
+    def publish_event(self, event):
+        self.ring_buffer.publish_event(event)
 
     def stop(self):
         for group in self.event_handler_groups:

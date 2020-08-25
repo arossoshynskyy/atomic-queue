@@ -21,6 +21,8 @@ class EventProcessor(threading.Thread):
 
         next_sequence = self.sequence.get() + 1
 
+        # TODO if the publisher is stopped before the processor we will be
+        # stuck in this loop forever as we wait for the next slot to open
         while not self.stop_thread:
             available_sequence = self.sequence_barrier.wait_for(next_sequence)
 

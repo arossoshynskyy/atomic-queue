@@ -1,21 +1,12 @@
-import unittest
 import threading
 import time
+import unittest
 
 from atomicqueue import (
     AtomicQueue,
     EventHandler,
-    Translator,
     BUSY_SPIN_WAIT_STRATEGY,
 )
-
-
-class TestTranslator(Translator):
-    def translate(self, event, data):
-        event.id = data["id"]
-        event.price = data["price"]
-        event.size = data["size"]
-        event.side = data["side"]
 
 
 class Publisher(threading.Thread):
@@ -24,33 +15,19 @@ class Publisher(threading.Thread):
         self.queue = queue
         self.name = name
         self.num_events = num_events
-        self.translator = TestTranslator()
 
     def run(self):
         for idx in range(self.num_events):
-            data = {
+            event = {
                 "id": f"{self.name}_{idx}",
                 "price": 10,
                 "size": 10,
                 "side": "buy",
             }
 
-            print(f"Publishing data {data}")
+            print(f"Publishing event {event}")
 
-            self.queue.publish_event(self.translator, data)
-
-
-class Event:
-    __slots__ = ("id", "price", "size", "side")
-
-    def __init__(self):
-        self.id = ""
-        self.price = 0
-        self.size = 0
-        self.side = ""
-
-    def __str__(self):
-        return f"id={self.id}, price={self.price}, size={self.size}, side={self.side}"
+            self.queue.publish_event(event)
 
 
 class NoOpEventHandler(EventHandler):
@@ -63,7 +40,7 @@ class NoOpEventHandler(EventHandler):
 class TestAtomicQueue(unittest.TestCase):
     @unittest.skip
     def test_one_publisher_one_consumer(self):
-        queue = AtomicQueue(Event, BUSY_SPIN_WAIT_STRATEGY, 12)
+        queue = AtomicQueue(12, wait_strategy=BUSY_SPIN_WAIT_STRATEGY)
 
         queue.handle_events_with(NoOpEventHandler("h_one"))
 
@@ -75,7 +52,7 @@ class TestAtomicQueue(unittest.TestCase):
 
     @unittest.skip
     def test_one_publisher_multiple_consumers(self):
-        queue = AtomicQueue(Event, BUSY_SPIN_WAIT_STRATEGY, 128)
+        queue = AtomicQueue(128, wait_strategy=BUSY_SPIN_WAIT_STRATEGY)
 
         queue.handle_events_with(NoOpEventHandler("h_one")).then(
             NoOpEventHandler("h_two")
@@ -89,7 +66,7 @@ class TestAtomicQueue(unittest.TestCase):
 
     # @unittest.skip
     def test_multiple_publishers_multiple_consumers(self):
-        queue = AtomicQueue(Event, BUSY_SPIN_WAIT_STRATEGY, 4096)
+        queue = AtomicQueue(4096, wait_strategy=BUSY_SPIN_WAIT_STRATEGY)
 
         queue.handle_events_with(NoOpEventHandler("h_one")).then(
             NoOpEventHandler("h_two")
@@ -103,8 +80,8 @@ class TestAtomicQueue(unittest.TestCase):
         publisher1.start()
         publisher2.start()
 
-        #time.sleep(2)
-        #queue.stop()
+        # time.sleep(2)
+        # queue.stop()
 
 
 if __name__ == "__main__":
