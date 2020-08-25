@@ -21,5 +21,5 @@ setup(
     python_requires=">=3.6",
     url="https://github.com/arossoshynskyy/atomic-queue",
     setup_requires=["atomic-sequence"],
-    version="1.0.0",
+    version="1.0.1",
 )

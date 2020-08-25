@@ -6,7 +6,7 @@ while consumer threads are managed by the queue and are required to implement th
 
 ## Example
 
-Initialise an atomic queue instance with the Event type, a wait strategy, and buffer capacity. The buffer capacity must be a base 2 integer.
+Initialise an atomic queue instance with the buffer capacity and a wait strategy. The buffer capacity must be a power of 2 integer.
 
 ```
 from atomicqueue import AtomicQueue, BUSY_SPIN_WAIT_STRATEGY
@@ -30,4 +30,9 @@ To publish to the queue, simply call publish_event on the queue.
 
 ```
 queue.publish_event(event)
+```
+
+Stop the queue by calling stop().
+```
+queue.stop()
 ```
